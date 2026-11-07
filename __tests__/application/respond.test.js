@@ -627,7 +627,7 @@ describe('app.respond', () => {
         .head('/')
         .expect(201)
         .expect('content-type', 'text/plain')
-        .expect('content-length', '2')
+        .expect(res => assert.strictEqual(res.headers['content-length'], undefined))
     })
 
     it('should default to octet-stream', () => {
