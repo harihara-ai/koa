@@ -1,0 +1,6 @@
+{
+ "impact_scan": [
+  "lib/only.js",
+  "__tests__/lib/only.test.js"
+ ]
+}
