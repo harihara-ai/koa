@@ -1,0 +1,5 @@
+{"slices": [
+ {"id": "S1", "title": "response.json sends the value as JSON", "scenarios": 3, "modules": 1, "contracts": 0,
+  "symbols": 1, "lines": 35, "files": 2, "untested": "none", "testable": "yes", "estimate": true},
+ {"id": "S2", "title": "ctx.json delegates to response.json", "scenarios": 2, "modules": 1, "contracts": 0,
+  "symbols": 1, "lines": 20, "files": 2, "untested": "none", "testable": "yes", "estimate": true}]}
