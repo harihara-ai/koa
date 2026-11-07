@@ -79,3 +79,34 @@ describe('res.length', () => {
     })
   })
 })
+
+describe('res.length with a web stream body', () => {
+  const Koa = require('../..')
+  const request = require('supertest')
+  const helloStream = () => new ReadableStream({
+    start (c) {
+      c.enqueue(new TextEncoder().encode('hello world'))
+      c.close()
+    }
+  })
+
+  it('REQ-RES-002 happy: ReadableStream body has no length', () => {
+    const res = response()
+    res.body = helloStream()
+    assert.strictEqual(res.length, undefined)
+  })
+
+  it('REQ-RES-002 happy: Response body has no length', () => {
+    const res = response()
+    res.body = new Response('hello world')
+    assert.strictEqual(res.length, undefined)
+  })
+
+  it('REQ-RES-002 happy: HEAD sends no Content-Length', async () => {
+    const app = new Koa()
+    app.use(ctx => { ctx.body = helloStream() })
+    const res = await request(app.callback()).head('/')
+    assert.strictEqual(res.status, 200)
+    assert.strictEqual(res.headers['content-length'], undefined)
+  })
+})
