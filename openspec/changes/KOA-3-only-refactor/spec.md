@@ -21,7 +21,8 @@ none
 `toJSON()` callers in `lib/application.js`, `lib/request.js`, `lib/response.js`.
 
 ## Assumptions
-Keys come from callers as arrays of strings; values are read once each (getters included).
+Keys come from callers as arrays of strings. Today each kept value is read twice (check, then copy); the callers' getters
+have no side effects, so reading once instead is not a behaviour change and is not pinned.
 
 ## Open questions
 none
