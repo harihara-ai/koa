@@ -1,0 +1,122 @@
+[
+ {
+  "id": "lib-application",
+  "path": "lib/application.js",
+  "kind": "module",
+  "purpose": "Koa app class and request handling",
+  "module": "application",
+  "module_paths": [
+   "lib/application.js"
+  ],
+  "confidence": "low",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": null
+ },
+ {
+  "id": "lib-context",
+  "path": "lib/context.js",
+  "kind": "module",
+  "purpose": "ctx prototype and error handling",
+  "module": "context",
+  "module_paths": [
+   "lib/context.js"
+  ],
+  "confidence": "low",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [
+   "lib-request",
+   "lib-response"
+  ],
+  "est_tokens": null
+ },
+ {
+  "id": "lib-request",
+  "path": "lib/request.js",
+  "kind": "module",
+  "purpose": "request getters",
+  "module": "request",
+  "module_paths": [
+   "lib/request.js",
+   "lib/search-params.js"
+  ],
+  "confidence": "low",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": null
+ },
+ {
+  "id": "lib-response",
+  "path": "lib/response.js",
+  "kind": "module",
+  "purpose": "response setters and body handling",
+  "module": "response",
+  "module_paths": [
+   "lib/response.js",
+   "lib/is-stream.js"
+  ],
+  "confidence": "low",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": null
+ },
+ {
+  "id": "lib-helpers",
+  "path": "lib/only.js",
+  "kind": "module",
+  "purpose": "small helpers",
+  "module": "helpers",
+  "module_paths": [
+   "lib/only.js",
+   "lib/is-stream.js",
+   "lib/search-params.js"
+  ],
+  "confidence": "low",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": null
+ },
+ {
+  "id": "practices",
+  "path": "docs/ai/practices.md",
+  "kind": "practices",
+  "purpose": "how the repo works",
+  "module": null,
+  "module_paths": [
+   ".github/*",
+   "package.json",
+   "__tests__/*"
+  ],
+  "confidence": "medium",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": 400
+ },
+ {
+  "id": "repo-map",
+  "path": "docs/ai/repo-map.md",
+  "kind": "map",
+  "purpose": "one-screen repo map",
+  "module": null,
+  "module_paths": [
+   "lib/*",
+   "__tests__/*"
+  ],
+  "confidence": "medium",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": 350
+ },
+ {
+  "id": "toolchain",
+  "path": "docs/ai/toolchain.md",
+  "kind": "toolchain",
+  "purpose": "probe results",
+  "module": null,
+  "module_paths": [],
+  "confidence": "high",
+  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "depends_on": [],
+  "est_tokens": 150
+ }
+]
