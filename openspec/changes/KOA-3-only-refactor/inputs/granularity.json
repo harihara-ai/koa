@@ -1,0 +1,5 @@
+{"slices": [
+ {"id": "S0", "title": "characterize only()", "kind": "characterization", "scenarios": 3, "modules": 1,
+  "contracts": 0, "symbols": 1, "lines": 35, "files": 1, "untested": "none", "testable": "yes", "estimate": true},
+ {"id": "S1", "title": "shorter only()", "scenarios": 0, "modules": 1, "contracts": 0, "symbols": 1,
+  "lines": 10, "files": 1, "untested": "none", "testable": "yes", "estimate": true}]}
