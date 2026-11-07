@@ -1,0 +1,6 @@
+{
+ "impact_scan": [
+  "lib/response.js",
+  "__tests__/response/length.test.js"
+ ]
+}
