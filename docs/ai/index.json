@@ -17,13 +17,13 @@
   "id": "lib-context",
   "path": "lib/context.js",
   "kind": "module",
-  "purpose": "ctx prototype and error handling",
+  "purpose": "ctx prototype and error handling; delegates json() to the response (KOA-1)",
   "module": "context",
   "module_paths": [
    "lib/context.js"
   ],
   "confidence": "low",
-  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "verified_sha": "da28a526cd1a07562aa620f359bf69c76013edcd",
   "depends_on": [
    "lib-request",
    "lib-response"
@@ -49,14 +49,14 @@
   "id": "lib-response",
   "path": "lib/response.js",
   "kind": "module",
-  "purpose": "response setters and body handling",
+  "purpose": "response setters and body handling; json(value) (KOA-1); length undefined for web stream bodies (KOA-2)",
   "module": "response",
   "module_paths": [
    "lib/response.js",
    "lib/is-stream.js"
   ],
   "confidence": "low",
-  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "verified_sha": "da28a526cd1a07562aa620f359bf69c76013edcd",
   "depends_on": [],
   "est_tokens": null
  },
@@ -64,7 +64,7 @@
   "id": "lib-helpers",
   "path": "lib/only.js",
   "kind": "module",
-  "purpose": "small helpers",
+  "purpose": "small helpers; only() is one Object.fromEntries expression (KOA-3)",
   "module": "helpers",
   "module_paths": [
    "lib/only.js",
@@ -72,7 +72,7 @@
    "lib/search-params.js"
   ],
   "confidence": "low",
-  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "verified_sha": "da28a526cd1a07562aa620f359bf69c76013edcd",
   "depends_on": [],
   "est_tokens": null
  },
@@ -88,7 +88,7 @@
    "__tests__/*"
   ],
   "confidence": "medium",
-  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "verified_sha": "da28a526cd1a07562aa620f359bf69c76013edcd",
   "depends_on": [],
   "est_tokens": 400
  },
@@ -103,7 +103,7 @@
    "__tests__/*"
   ],
   "confidence": "medium",
-  "verified_sha": "e6f68d6400ee7d02e52d56d0b0cd8837536bcaed",
+  "verified_sha": "da28a526cd1a07562aa620f359bf69c76013edcd",
   "depends_on": [],
   "est_tokens": 350
  },
