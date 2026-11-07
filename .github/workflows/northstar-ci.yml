@@ -1,0 +1,109 @@
+# North Star kit CI (kit/INSTALL.md "CI is the gate that counts"). High-risk: a human reviews every change.
+# pull_request_target: GitHub runs this file as it is on master (the default branch), so a PR cannot change the jobs.
+name: northstar-ci
+on:
+  pull_request_target:
+    branches: [master]
+  push:
+    branches: [master]
+permissions: {}
+jobs:
+  tests:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          allow-unsafe-pr-checkout: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: PR tests with coverage
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/out"
+          npx c8 --reporter=lcov --report-dir "$RUNNER_TEMP/out" node --test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ${{ runner.temp }}/out/lcov.info
+          if-no-files-found: error
+
+  gate:
+    # Fresh runner. No PR code runs before gate_check; only red_check (the last gate) runs PR tests.
+    if: github.event_name == 'pull_request_target'
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          allow-unsafe-pr-checkout: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: approved kit and test tools from master
+        run: |
+          set -e
+          git worktree add ../approved origin/master
+          (cd ../approved && npm ci --ignore-scripts)
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage
+          path: ${{ runner.temp }}/out
+      - name: latest baseline report of master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          RUN=$(gh run list -R "$GITHUB_REPOSITORY" -w northstar-ci -b master -e push -s success -L 1 \
+            --json databaseId -q '.[0].databaseId')
+          gh run download "$RUN" -R "$GITHUB_REPOSITORY" -n coverage-baseline -D "$RUNNER_TEMP/base"
+      - name: gate_check
+        run: |
+          set -e
+          BASE=$(git merge-base HEAD origin/master)
+          # Test tools come from the approved lock file, never from files the PR changed.
+          export NODE_PATH="$(cd ../approved && pwd)/node_modules"
+          python3 -I ../approved/kit/scripts/gate_check.py auto --repo . --change auto --base "$BASE" \
+            --coverage-report "$RUNNER_TEMP/out/lcov.info" --baseline-report "$RUNNER_TEMP/base/lcov.info" \
+            --test-cmd "node --test {tests}"
+
+  baseline:
+    # After each merge: tests with coverage on master; the latest report is the next PR's baseline.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: tests with coverage
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/out"
+          npx c8 --reporter=lcov --report-dir "$RUNNER_TEMP/out" node --test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-baseline
+          path: ${{ runner.temp }}/out/lcov.info
+          retention-days: 90
+          if-no-files-found: error
