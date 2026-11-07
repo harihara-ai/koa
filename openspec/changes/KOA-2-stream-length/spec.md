@@ -40,5 +40,10 @@ Measuring a stream's size; Blob, Buffer, string and JSON bodies (already right: 
 ## Assumptions
 A Response body that carries its own Content-Length keeps it (the body setter copies the Response headers).
 
+## Edited test
+`__tests__/application/respond.test.js` "should keep Response headers" asserts HEAD on `new Response(null, ...)`
+sends `content-length: 2`: it pins this bug. Owner decision (2026-11-07): that assertion becomes "no
+Content-Length header"; status 201 and the content-type stay. A human reviews the edit (kit rule 10).
+
 ## Open questions
 none
