@@ -1,0 +1,8 @@
+{
+ "impact_scan": [
+  "lib/response.js",
+  "lib/context.js",
+  "__tests__/response/json.test.js",
+  "__tests__/context/json.test.js"
+ ]
+}
