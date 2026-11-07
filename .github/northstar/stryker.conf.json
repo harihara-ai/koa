@@ -1,0 +1,7 @@
+{
+  "testRunner": "command",
+  "commandRunner": { "command": "node --test" },
+  "coverageAnalysis": "off",
+  "reporters": ["clear-text", "json"],
+  "concurrency": 2
+}

@@ -82,6 +82,34 @@ jobs:
             --coverage-report "$RUNNER_TEMP/out/lcov.info" --baseline-report "$RUNNER_TEMP/base/lcov.info" \
             --test-cmd "node --test {tests}"
 
+  mutation:
+    # Fix plan item 2: mutation score on the PR's changed lib/ lines. Report only: not a required check.
+    # Same isolation as tests: fresh runner, read-only token, PR code without credentials.
+    if: github.event_name == 'pull_request_target'
+    needs: tests
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          allow-unsafe-pr-checkout: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: diff-scoped mutation testing (Stryker)
+        run: |
+          set -e
+          git worktree add ../approved origin/master
+          BASE=$(git merge-base HEAD origin/master)
+          bash ../approved/.github/northstar/mutation.sh "$BASE" "$RUNNER_TEMP/mut"
+          cat "$RUNNER_TEMP/mut/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
   baseline:
     # After each merge: tests with coverage on master; the latest report is the next PR's baseline.
     if: github.event_name == 'push'
