@@ -139,6 +139,22 @@
   type: script
   path: kit/scripts/slicer.py
   needs: [script.kitconst]
+- id: script.slice_pr
+  type: script
+  path: kit/scripts/slice_pr.py
+  needs: [script.kitconst, script.pr_body, script.slicer, script.gate_check]
+- id: script.pr_body
+  type: script
+  path: kit/scripts/pr_body.py
+  needs: [script.kitconst, template.pr]
+- id: script.upgrade
+  type: script
+  path: kit/scripts/upgrade.py
+  needs: [script.gate_check]
+- id: script.metrics_pull
+  type: script
+  path: kit/scripts/metrics_pull.py
+  needs: []
 - id: playbook.router
   type: playbook
   path: kit/playbooks/router.md

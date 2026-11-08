@@ -66,3 +66,4 @@ Hotfix at night: an admin merges with the check overridden; within 5 working day
 
 ## Upgrade
 In one human PR, delete `kit/` and unzip the new install zip at the root (Files, step 1), then run `/refresh`.
+`python3 kit/scripts/upgrade.py --zip <install zip> --target <branch>` does both and runs the gate with the old and new kit.
