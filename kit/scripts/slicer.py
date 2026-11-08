@@ -7,7 +7,8 @@ scan: each slice in inputs/granularity.json names "seeds": {"symbols": [...], "v
 spec). git grep finds code and tests that use a symbol, and tests that hold a value (tests that pin current
 behaviour, P04). Writes inputs/impact.json, raises "files" and "symbols" (never lowers them) and adds the files to
 inputs/diff_scope.json impact_scan. actual: changed lines and files outside the change folder vs the estimate; a
-miss is more than 50% over; scan_misses are changed files the scan did not list. --metrics appends a metrics.csv row.
+miss is more than 50% over; scan_misses are changed files neither the scan nor the plan (diff_scope.json) lists.
+--metrics appends a metrics.csv row.
 Report only: exit 0, or 2 on bad input. Seeds are data: matched literally, never as options or patterns.
 """
 import argparse
@@ -108,6 +109,7 @@ def actual(ch, base, slice_id, metrics):
     s, diff = pick[0], changed(base, ch)
     scanned = load(os.path.join(ch, "inputs", "impact.json"), {"slices": {}})["slices"].get(str(s.get("id")), {})
     listed = set(scanned.get("code", []) + scanned.get("tests", []) + [p.split(":")[0] for p in scanned.get("pins", [])])
+    listed |= set(load(os.path.join(ch, "inputs", "diff_scope.json"), {}).get("impact_scan", []))  # added files (S2-01)
     est_l, est_f = s.get("lines") or 0, s.get("files") or 0
     got_l, got_f = sum(diff.values()), len(diff)
     err = round(100.0 * (got_l - est_l) / est_l, 1) if est_l else None
