@@ -31,4 +31,21 @@ describe('ctx.response.problem(status, detail)', () => {
       { name: 'TypeError', message: 'response.problem() needs a 4xx or 5xx status' })
     assert.strictEqual(ctx.body, 'before')
   })
+
+  it('REQ-RES-003 happy: a client that accepts only text/plain gets text', async () => {
+    const app = new Koa()
+    app.use(ctx => { ctx.response.problem(404, 'No user 7') })
+    const res = await request(app.callback()).get('/').set('Accept', 'text/plain')
+    assert.strictEqual(res.status, 404)
+    assert.strictEqual(res.headers['content-type'], 'text/plain; charset=utf-8')
+    assert.strictEqual(res.text, 'Not Found: No user 7')
+  })
+
+  it('REQ-RES-003 error: a client that accepts none of the offered types still gets problem+json', async () => {
+    const app = new Koa()
+    app.use(ctx => { ctx.response.problem(404) })
+    const res = await request(app.callback()).get('/').set('Accept', 'image/png')
+    assert.strictEqual(res.status, 404)
+    assert.strictEqual(res.headers['content-type'], 'application/problem+json')
+  })
 })
