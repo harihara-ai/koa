@@ -68,4 +68,19 @@ describe('req.ips', () => {
       })
     })
   })
+  describe('REQ-REQ-003: an IPv4 entry with a port', () => {
+    it('REQ-REQ-003 happy: drops the port of an IPv4 entry', () => {
+      const req = request()
+      req.app.proxy = true
+      req.header['x-forwarded-for'] = '23.243.1.1:38242, 10.0.0.1'
+      assert.deepStrictEqual(req.ips, ['23.243.1.1', '10.0.0.1'])
+    })
+
+    it('REQ-REQ-003 edge: returns invalid entries unchanged', () => {
+      const req = request()
+      req.app.proxy = true
+      req.header['x-forwarded-for'] = '1.2.3.4:abc, host.example:80, unknown'
+      assert.deepStrictEqual(req.ips, ['1.2.3.4:abc', 'host.example:80', 'unknown'])
+    })
+  })
 })
