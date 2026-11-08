@@ -34,10 +34,22 @@ describe('ctx.length', () => {
     assert.strictEqual(req.length, 10000000000)
   })
 
-  it('should handle floating-point-like strings (truncate decimal)', () => {
+  it('REQ-REQ-001 happy: digits only give the number', () => {
+    const req = request()
+    req.header['content-length'] = '2147483648'
+    assert.strictEqual(req.length, 2147483648)
+  })
+
+  it('REQ-REQ-001 error: a decimal value gives undefined', () => {
     const req = request()
     req.header['content-length'] = '10.5'
-    assert.strictEqual(req.length, 10)
+    assert.strictEqual(req.length, undefined)
+  })
+
+  it('REQ-REQ-001 error: digits then junk give undefined', () => {
+    const req = request()
+    req.header['content-length'] = '10abc'
+    assert.strictEqual(req.length, undefined)
   })
 
   it('should return undefined for non-numeric strings', () => {

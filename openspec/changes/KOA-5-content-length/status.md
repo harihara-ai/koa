@@ -1,4 +1,4 @@
 purpose: where KOA-5 stands; any session resumes here.
 
-stage: plan PR
-next: a human merges the plan; then code PR S1 (fix/KOA-5-content-length-S1)
+stage: code PR S1 (green locally)
+next: CI done gate on S1; a human merges; then code PR S2
