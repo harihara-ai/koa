@@ -56,4 +56,21 @@ describe('req.ip', () => {
     request.ip = '127.0.0.1'
     assert.strictEqual(request.ip, '127.0.0.1')
   })
+  describe('REQ-REQ-005: the first forwarded address without its port', () => {
+    it('REQ-REQ-005 happy: ip from a header with a port', () => {
+      const app = new Koa()
+      const req = { headers: { 'x-forwarded-for': '23.243.1.1:38242' }, socket: new Stream.Duplex() }
+      app.proxy = true
+      req.socket.remoteAddress = '127.0.0.2'
+      assert.strictEqual(Request(req, undefined, app).ip, '23.243.1.1')
+    })
+
+    it('REQ-REQ-005 edge: no header gives the socket address', () => {
+      const app = new Koa()
+      const req = { headers: {}, socket: new Stream.Duplex() }
+      app.proxy = true
+      req.socket.remoteAddress = '127.0.0.1'
+      assert.strictEqual(Request(req, undefined, app).ip, '127.0.0.1')
+    })
+  })
 })
