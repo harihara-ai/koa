@@ -17,3 +17,8 @@ used on both sides of the `back` comparison -> pass 11, fail 0; full suite pass 
 Root cause: `back` compared the Referer's parsed host with the raw Host text.
 Between S2 and S3 (probe, scratchpad): Host `example.com:80` with an `https:` Referer redirects to the Referer
 (same host name; not another host). S3's error scenario turns this back to `/fallback`.
+Refactor (before merge, found while building S3): the `try/catch` around `new URL` in `canonicalHost` was dead. A
+Host the URL parser refuses (`exa mple.com`, `example.com:99999`) already throws `ERR_INVALID_URL` in `back` at
+`new URL(referrer, ctx.href)`, on master too, before the helper runs. Removed; full suite pass 468; host.js lines 100%.
+The spec assumption "a Host the URL parser refuses never matches" is wrong: it throws, as before this change
+(out of scope; noted, not changed). The non-default port branch is covered by S3's tests.
