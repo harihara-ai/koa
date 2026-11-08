@@ -7,18 +7,22 @@ const fs = require('fs')
 
 describe('res.length', () => {
   describe('when Content-Length is defined', () => {
-    it('should return a number', () => {
+    it('REQ-RES-004 happy: digits only give the number', () => {
       const res = response()
       res.set('Content-Length', '1024')
       assert.strictEqual(res.length, 1024)
     })
 
-    describe('but not number', () => {
-      it('should return 0', () => {
-        const res = response()
-        res.set('Content-Length', 'hey')
-        assert.strictEqual(res.length, 0)
-      })
+    it('REQ-RES-004 error: a value that is not a number gives undefined', () => {
+      const res = response()
+      res.set('Content-Length', 'hey')
+      assert.strictEqual(res.length, undefined)
+    })
+
+    it('REQ-RES-004 error: digits then junk give undefined', () => {
+      const res = response()
+      res.set('Content-Length', '10abc')
+      assert.strictEqual(res.length, undefined)
     })
   })
 
