@@ -44,7 +44,7 @@ def payload_for(gate, ctx):
     elif gate == "injection":
         p["texts"] = texts_under(ch) + list(p.get("texts", []))
     elif gate == "trace_check":
-        p = {"spec_dirs": [plan], "type": ctx["type"]}
+        p = {"spec_dirs": [plan], "type": ctx["type"], "metrics": os.path.join(ch, "metrics.csv")}  # S04
     elif gate == "policy_guard":
         p = {"old": FLOOR, "baselines": ctx["baselines"], "new": ctx["policy_path"], "signoff": ctx["signoff"]}
     elif gate == "diff_scope" and ctx["stage"] == "ready":

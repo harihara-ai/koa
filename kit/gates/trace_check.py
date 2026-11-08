@@ -4,6 +4,8 @@
 Input: {"spec_dirs": [change folder], "type": work type}. Requirement IDs come from spec.md and specs/*.md only
 (never the fetched ticket). Test files are code or .feature files matching the fixed test globs (kitconst), so
 an ID in production code, docs or a text file does not count. REQ-AREA-001, REQ_AREA_001, testReq_Area_001 match.
+One code PR per slice (S04): with "metrics" (the PR's metrics.csv from slicer actual --metrics), a requirement whose
+slices.md row (approved plan) names only slices without a metrics row is pending (a warning); the rest need a test.
 """
 import os
 import re
@@ -55,8 +57,30 @@ def check(p):
     tested, n = test_ids()
     if not n:
         return [finding("no_test_files", "no test files found (see kitconst.TEST_GLOBS)")], {}
-    f = [finding("untested", "%s has no test" % i, i) for i in sorted(ids - tested)]
+    later = pending(p.get("spec_dirs", []), p.get("metrics"))
+    f = [finding("untested", "%s has no test" % i, i) for i in sorted(ids - tested - later)]
+    f += [finding("pending", "%s belongs to a slice not built yet" % i, i, "warn") for i in sorted((ids & later) - tested)]
     return f, {"requirements": sorted(ids)}
+
+
+def pending(dirs, metrics):
+    """Requirements whose slices.md rows name only slices with no metrics.csv row yet."""
+    later, built = set(), set()
+    if not (metrics and os.path.isfile(metrics)):
+        return later
+    with open(metrics, encoding="utf-8", errors="ignore") as fh:
+        done = {line.split(",")[0].strip() for line in fh.readlines()[1:]}
+    for d in dirs:
+        rows = os.path.join(d, "slices.md")
+        if not os.path.isfile(rows):
+            continue
+        with open(rows, encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                cells = line.strip().strip("|").split("|")
+                if line.startswith("|") and len(cells) > 1:
+                    reqs = {norm(*i.split("-")[1:]) for i in SPEC_ID.findall(line)}
+                    (built if cells[0].strip() in done else later).update(reqs)
+    return later - built
 
 
 if __name__ == "__main__":
