@@ -1,0 +1,28 @@
+{
+ "slices": {
+  "S1": {
+   "code": [
+    "lib/context.js",
+    "lib/response.js",
+    "lib/search-params.js"
+   ],
+   "tests": [
+    "__tests__/response/append.test.js",
+    "__tests__/response/vary.test.js"
+   ],
+   "pins": []
+  },
+  "S2": {
+   "code": [],
+   "tests": [],
+   "pins": [
+    "__tests__/application/response.test.js:105"
+   ]
+  },
+  "S3": {
+   "code": [],
+   "tests": [],
+   "pins": []
+  }
+ }
+}

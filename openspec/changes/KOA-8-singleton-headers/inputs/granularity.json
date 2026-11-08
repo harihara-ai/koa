@@ -1,0 +1,79 @@
+{
+ "slices": [
+  {
+   "id": "S1",
+   "title": "response.append refuses a second value for a singleton header",
+   "requirements": [
+    "REQ-RES-003"
+   ],
+   "scenarios": 2,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 30,
+   "files": 5,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "append",
+     "SINGLETON_HEADERS"
+    ],
+    "values": [
+     "'Location', '/b'"
+    ]
+   }
+  },
+  {
+   "id": "S2",
+   "title": "response.set refuses an array for a singleton header",
+   "requirements": [
+    "REQ-RES-001"
+   ],
+   "scenarios": 5,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 50,
+   "files": 3,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "SINGLETON_HEADERS"
+    ],
+    "values": [
+     "'Content-Type', ['image/jpg', 'application/json']",
+     "Assign multiple Content-Type"
+    ]
+   }
+  },
+  {
+   "id": "S3",
+   "title": "response.set with an object refuses an array for a singleton header",
+   "requirements": [
+    "REQ-RES-002"
+   ],
+   "scenarios": 2,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 1,
+   "lines": 20,
+   "files": 2,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "SINGLETON_HEADERS"
+    ],
+    "values": [
+     "Assign multiple Content-Type",
+     "'Content-Type': ['a', 'b']"
+    ]
+   }
+  }
+ ]
+}
