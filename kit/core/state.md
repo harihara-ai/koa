@@ -12,7 +12,7 @@ All under `openspec/changes/<name>/`:
 | `slices.md` | Ordered slice plan with scores | `/slice` |
 | `status.md` | `slice:`, `task:`, `next:` lines | Every command, at each step |
 | `evidence.md` | RED then GREEN command and short output per scenario; marks the plan as used once merged | `/implement` |
-| `metrics.csv` | `slice,est_lines,actual_lines,files,attempts` | `/implement` |
+| `metrics.csv` | `slice,est_lines,actual_lines,est_files,actual_files,line_error_pct,miss,scan_misses` | `/implement` |
 | `inputs/<gate>.json` | Input for one gate | The command that runs the gate |
 | `gates-ready.json`, `gates-done.json` | Last gate_check result | `gate_check.py` |
 
