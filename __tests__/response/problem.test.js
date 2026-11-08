@@ -41,6 +41,14 @@ describe('ctx.response.problem(status, detail)', () => {
     assert.strictEqual(res.text, 'Not Found: No user 7')
   })
 
+  it('REQ-RES-003 happy: a text-only client gets the title when there is no detail', async () => {
+    const app = new Koa()
+    app.use(ctx => { ctx.response.problem(503) })
+    const res = await request(app.callback()).get('/').set('Accept', 'text/plain')
+    assert.strictEqual(res.status, 503)
+    assert.strictEqual(res.text, 'Service Unavailable')
+  })
+
   it('REQ-RES-003 error: a client that accepts none of the offered types still gets problem+json', async () => {
     const app = new Koa()
     app.use(ctx => { ctx.response.problem(404) })
