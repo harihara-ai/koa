@@ -83,4 +83,26 @@ describe('req.ips', () => {
       assert.deepStrictEqual(req.ips, ['1.2.3.4:abc', 'host.example:80', 'unknown'])
     })
   })
+  describe('REQ-REQ-004: an IPv6 entry in brackets', () => {
+    it('REQ-REQ-004 happy: drops the brackets and port of an IPv6 entry', () => {
+      const req = request()
+      req.app.proxy = true
+      req.header['x-forwarded-for'] = '[2001:db8::1]:8080'
+      assert.deepStrictEqual(req.ips, ['2001:db8::1'])
+    })
+
+    it('REQ-REQ-004 happy: drops the brackets of an IPv6 entry without a port', () => {
+      const req = request()
+      req.app.proxy = true
+      req.header['x-forwarded-for'] = '[2001:db8::1]'
+      assert.deepStrictEqual(req.ips, ['2001:db8::1'])
+    })
+
+    it('REQ-REQ-004 edge: returns bare IPv6 entries unchanged', () => {
+      const req = request()
+      req.app.proxy = true
+      req.header['x-forwarded-for'] = '2001:db8::1, ::ffff:1.2.3.4'
+      assert.deepStrictEqual(req.ips, ['2001:db8::1', '::ffff:1.2.3.4'])
+    })
+  })
 })
