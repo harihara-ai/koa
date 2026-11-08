@@ -62,4 +62,22 @@ describe('ctx.back([alt])', () => {
     ctx.back('/home')
     assert.equal(ctx.response.header.location, '/home')
   })
+
+  it('REQ-RES-005 should redirect to a same host Referer when Host is upper case', () => {
+    const ctx = context({ url: '/', headers: { host: 'EXAMPLE.COM', referer: 'http://example.com/return' } })
+    ctx.back('/fallback')
+    assert.equal(ctx.response.header.location, 'http://example.com/return')
+  })
+
+  it('REQ-RES-005 should redirect to a same host Referer when Host has a root dot', () => {
+    const ctx = context({ url: '/', headers: { host: 'example.com.', referer: 'https://example.com/return' } })
+    ctx.back('/fallback')
+    assert.equal(ctx.response.header.location, 'https://example.com/return')
+  })
+
+  it('REQ-RES-005 should use alt for another host when Host is upper case', () => {
+    const ctx = context({ url: '/', headers: { host: 'EXAMPLE.COM', referer: 'http://other.com/return' } })
+    ctx.back('/fallback')
+    assert.equal(ctx.response.header.location, '/fallback')
+  })
 })
