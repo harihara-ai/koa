@@ -135,6 +135,10 @@
   type: script
   path: kit/scripts/probe.py
   needs: [script.gateio, core.state]
+- id: script.slicer
+  type: script
+  path: kit/scripts/slicer.py
+  needs: [script.kitconst]
 - id: playbook.router
   type: playbook
   path: kit/playbooks/router.md
