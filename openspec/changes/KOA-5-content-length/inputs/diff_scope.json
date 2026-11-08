@@ -1,0 +1,11 @@
+{
+ "impact_scan": [
+  "lib/content-length.js",
+  "lib/request.js",
+  "__tests__/request/length.test.js",
+  "lib/response.js",
+  "__tests__/response/length.test.js",
+  "__tests__/request/fresh.test.js",
+  "__tests__/response/body.test.js"
+ ]
+}

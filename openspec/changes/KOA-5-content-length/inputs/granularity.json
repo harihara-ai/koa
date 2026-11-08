@@ -1,0 +1,48 @@
+{
+ "slices": [
+  {
+   "id": "S1",
+   "title": "request.length reads only a valid Content-Length",
+   "scenarios": 3,
+   "modules": 2,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 35,
+   "files": 3,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "parseContentLength"
+    ],
+    "values": [
+     "10.5",
+     "10abc"
+    ]
+   }
+  },
+  {
+   "id": "S2",
+   "title": "response.length reads only a valid Content-Length",
+   "scenarios": 3,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 25,
+   "files": 3,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "parseContentLength"
+    ],
+    "values": [
+     "'hey'",
+     "10abc"
+    ]
+   }
+  }
+ ]
+}
