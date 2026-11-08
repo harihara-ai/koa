@@ -1,0 +1,36 @@
+{
+ "slices": {
+  "S1": {
+   "code": [
+    "lib/context.js",
+    "lib/request.js"
+   ],
+   "tests": [
+    "__tests__/request/subdomains.test.js"
+   ],
+   "pins": []
+  },
+  "S2": {
+   "code": [
+    "lib/context.js",
+    "lib/response.js"
+   ],
+   "tests": [
+    "__tests__/response/back.test.js"
+   ],
+   "pins": []
+  },
+  "S3": {
+   "code": [
+    "lib/context.js",
+    "lib/response.js"
+   ],
+   "tests": [
+    "__tests__/response/back.test.js"
+   ],
+   "pins": [
+    "__tests__/request/host.test.js:114"
+   ]
+  }
+ }
+}
