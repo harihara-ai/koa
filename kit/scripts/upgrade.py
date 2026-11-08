@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """purpose: upgrade an installed kit: delete kit/, unzip the install zip, run the gate with the new and the old kit.
 
-Usage: upgrade.py --zip northstar-kit-install.zip [--target BRANCH] [--repo DIR] [-- GATE ARGS]
+Usage: upgrade.py --zip northstar-kit-install.zip [--target REF] [--repo DIR] [-- GATE ARGS]
+The base is the merge-base with --target, or by default with the remote default branch (as gate_check uses).
 Refuses (exit 1, nothing changed) a checkout with uncommitted or untracked files; refuses (exit 2, nothing changed)
 a zip with no kit/ or with a path outside kit/, .claude/commands/ and kit.manifest.yml. Leaves the result
 uncommitted for the human upgrade PR. Prints JSON: changed, deleted, gate_new, gate_old. Exit 0 both gates pass.
@@ -15,6 +16,8 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from changectx import default_base  # noqa: E402
 
 ALLOWED = ("kit/", ".claude/commands/")
 
@@ -61,7 +64,9 @@ def old_kit(base):
 
 
 def upgrade(path, target, extra):
-    base = git("merge-base", "HEAD", target).strip()
+    base = git("merge-base", "HEAD", target).strip() if target else default_base()
+    if not base:
+        raise ValueError("no remote default branch to compare with: fetch it or pass --target <ref>")
     dirty = sorted(p for _s, p in porcelain())
     if dirty:
         return 1, {"dirty": dirty, "why": "commit, stash or move these first; an upgrade PR holds only the kit"}
@@ -81,7 +86,7 @@ def main():
     argv = sys.argv[1:]
     cut = argv.index("--") if "--" in argv else len(argv)
     opts, extra = argv[:cut], argv[cut + 1:]
-    a = {"--zip": None, "--target": "master", "--repo": "."}
+    a = {"--zip": None, "--target": None, "--repo": "."}
     while opts:
         key = opts.pop(0)
         if key not in a or not opts:

@@ -6,7 +6,8 @@ Usage: slicer.py scan   --change openspec/changes/<name> [--repo DIR]
 scan: each slice in inputs/granularity.json names "seeds": {"symbols": [...], "values": [...]} (from codenav and the
 spec). git grep finds code (CODE_EXT only, not release notes or site xml: T5-01) and tests that use a symbol, and
 tests that hold a value (tests that pin current behaviour, P04). Writes inputs/impact.json, raises "files" and
-"symbols" (never lowers them) and adds the files to inputs/diff_scope.json impact_scan. actual: changed lines and
+"symbols" (never lowers them), adds the files to inputs/diff_scope.json impact_scan, and scores each slice with the
+granularity gate's own check ("granularity", and "split": slices to split before `ready`; T3-02). actual: changed lines and
 files outside the change folder vs the estimate; a miss is more than 50% over; scan_misses are changed files
 neither the scan nor the plan (diff_scope.json) lists.
 --metrics appends a metrics.csv row.
@@ -20,6 +21,10 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+KIT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(KIT, "gates"))
+import granularity  # noqa: E402
+import policy  # noqa: E402
 from kitconst import CODE_EXT, DOCS, is_test_file, matches  # noqa: E402
 
 SKIP = ["openspec/*", "kit/*", "docs/*", ".claude/*", ".github/*"]
@@ -91,7 +96,11 @@ def scan(ch):
     save(gpath, plan)
     scope["impact_scan"] = list(scope.get("impact_scan", [])) + sorted(found - set(scope.get("impact_scan", [])))
     save(dpath, scope)
-    return {"impact": impact, "raised": raised}
+    pol_path = os.path.join("docs", "ai", "policy.yml")
+    pol = policy.load(pol_path if os.path.isfile(pol_path) else os.path.join(KIT, "core", "policy.yml"))
+    found_g, extra = granularity.check({"slices": plan["slices"], "policy": pol})
+    return {"impact": impact, "raised": raised, "granularity": extra["slices"],
+            "split": [f["where"] for f in found_g if f["rule"] == "split"]}
 
 
 def changed(base, ch):

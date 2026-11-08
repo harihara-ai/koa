@@ -25,6 +25,9 @@ Scenario: error - <concrete failure>
   Then <error result>
   Level: <unit|api|behaviour|ui>
 
+## Inputs
+- <input, e.g. a header or argument>: absent <REQ id|out>; empty <REQ id|out>; boundary <REQ id|out>; invalid <REQ id|out>
+
 ## Non-functional
 <each line has a number or a named standard, or write: none>
 
