@@ -1,0 +1,67 @@
+{
+ "slices": [
+  {
+   "id": "S1",
+   "title": "response.problem sends a problem+json body",
+   "scenarios": 3,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 1,
+   "lines": 45,
+   "files": 2,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "problem"
+    ],
+    "values": [
+     "application/problem+json"
+    ]
+   }
+  },
+  {
+   "id": "S2",
+   "title": "response.problem falls back to text for text-only clients",
+   "scenarios": 2,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 1,
+   "lines": 30,
+   "files": 2,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "problem"
+    ],
+    "values": [
+     "Not Found: "
+    ]
+   }
+  },
+  {
+   "id": "S3",
+   "title": "ctx.problem delegates to response.problem",
+   "scenarios": 2,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 1,
+   "lines": 40,
+   "files": 4,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "problem"
+    ],
+    "values": [
+     "response.problem() needs"
+    ]
+   }
+  }
+ ]
+}
