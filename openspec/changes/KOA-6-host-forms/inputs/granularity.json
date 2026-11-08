@@ -1,0 +1,73 @@
+{
+ "slices": [
+  {
+   "id": "S1",
+   "title": "request.subdomains ignores a trailing root dot",
+   "scenarios": 3,
+   "modules": 2,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 30,
+   "files": 3,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "stripRootDot",
+     "subdomains"
+    ],
+    "values": [
+     "'api.example.com.'",
+     "'example.com.'"
+    ]
+   }
+  },
+  {
+   "id": "S2",
+   "title": "response.back compares host names in canonical form",
+   "scenarios": 3,
+   "modules": 2,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 30,
+   "files": 3,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "canonicalHost",
+     "back"
+    ],
+    "values": [
+     "'EXAMPLE.COM'",
+     "'example.com.'"
+    ]
+   }
+  },
+  {
+   "id": "S3",
+   "title": "response.back ignores the default port of the Referer scheme",
+   "scenarios": 3,
+   "modules": 2,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 25,
+   "files": 4,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "canonicalHost",
+     "back"
+    ],
+    "values": [
+     "'example.com:80'",
+     "'example.com:8080'"
+    ]
+   }
+  }
+ ]
+}

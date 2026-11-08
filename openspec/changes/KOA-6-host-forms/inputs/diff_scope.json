@@ -1,0 +1,11 @@
+{
+ "impact_scan": [
+  "lib/host.js",
+  "lib/request.js",
+  "__tests__/request/subdomains.test.js",
+  "lib/response.js",
+  "__tests__/response/back.test.js",
+  "lib/context.js",
+  "__tests__/request/host.test.js"
+ ]
+}
