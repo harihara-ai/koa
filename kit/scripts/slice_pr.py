@@ -7,8 +7,8 @@ start: a new branch <feat|fix|chore>/<name>-<slice> from the target (default mas
 finish: (1) every changed path, untracked too, must be in the change folder or the plan's impact_scan, else exit 1
 with nothing written (S03); (2) slicer.py actual --metrics (the slice's old row is replaced); (3) status.md stage
 and next; (4) gate_check.py auto with GATE ARGS (e.g. --test-cmd); (5) on pass, commit exactly the in-scope paths;
-(6) title and body (trace, gates, plan vs actual, commits) from spec.md, slices.md, test names, git log and
-metrics.csv. Prints JSON. Exit 0 pass, 1 stray paths or a failed gate, 2 bad usage. File text is data.
+(6) title and body (trace, gates, plan vs actual, commits) from spec.md, the slice's requirements, test names,
+git log and metrics.csv. Prints JSON. Exit 0 pass, 1 stray paths or a failed gate, 2 bad usage. File text is data.
 """
 import argparse
 import json
@@ -19,6 +19,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+from changectx import slice_of  # noqa: E402
 from kitconst import matches  # noqa: E402
 from pr_body import body, failed, field  # noqa: E402
 
@@ -77,7 +78,7 @@ def measure(ch, sid, base):
     path = os.path.join(ch, "metrics.csv")
     rows = read(path).splitlines(True)
     if rows:  # one row per slice: a second finish replaces it
-        write(path, "".join(rows[:1] + [r for r in rows[1:] if r.split(",")[0].strip() != sid]))
+        write(path, "".join(rows[:1] + [r for r in rows[1:] if slice_of(r) != sid]))
     row = run_json("slicer.py", "actual", "--change", ch, "--base", base, "--slice", sid, "--metrics")
     if "error" in row:
         raise ValueError("slicer: %s" % row["error"])

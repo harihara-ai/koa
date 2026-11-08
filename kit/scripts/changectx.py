@@ -1,13 +1,16 @@
 """purpose: facts gate_check reads from git and the change folder: base, base-commit files, changed paths, texts.
 
-Every value comes from git or the files themselves, never from what an agent says about them.
+Every value comes from git or the files themselves, never from what an agent says about them. Also the one reader
+of metrics.csv (built slices) and of each slice's requirements, for trace_check, gate_check, slice_pr and pr_body.
 """
+import json
 import os
 import re
 import subprocess
 import tempfile
 
 DATA = ("comments/", "fetched/")
+REQ = re.compile(r"REQ-[A-Z0-9]+-[0-9]+")
 PLAN_FILES = ["spec.md", "slices.md", "inputs/diff_scope.json", "inputs/granularity.json"]
 
 
@@ -67,6 +70,52 @@ def exists_in_base(base, rel):
     """True if the file exists in the base commit, even when it is empty."""
     return bool(base) and subprocess.run(["git", "cat-file", "-e", "%s:%s" % (base, rel)],
                                          capture_output=True).returncode == 0
+
+
+def slice_of(row):
+    """The slice ID of one metrics.csv row (its first column)."""
+    return row.split(",")[0].strip()
+
+
+def built_slices(path):
+    """Slice IDs with a metrics.csv row (slicer actual --metrics), or None when there is no metrics.csv."""
+    if not (path and os.path.isfile(path)):
+        return None
+    with open(path, encoding="utf-8", errors="ignore") as fh:
+        return {slice_of(row) for row in fh.readlines()[1:]}
+
+
+def slice_requirements(d):
+    """{slice ID: REQ IDs} from inputs/granularity.json "requirements"; older plans: the slices.md table rows."""
+    try:
+        with open(os.path.join(d, "inputs", "granularity.json"), encoding="utf-8") as fh:
+            slices = json.load(fh).get("slices", [])
+    except (OSError, ValueError, AttributeError):
+        slices = []
+    if any(isinstance(s, dict) and "requirements" in s for s in slices):
+        return {str(s.get("id")): {r for r in s.get("requirements") or [] if isinstance(r, str) and REQ.fullmatch(r)}
+                for s in slices if isinstance(s, dict) and "requirements" in s}
+    out = {}
+    try:
+        with open(os.path.join(d, "slices.md"), encoding="utf-8", errors="ignore") as fh:
+            lines = fh.read().splitlines()
+    except OSError:
+        return out
+    for line in lines:
+        cells = line.strip().strip("|").split("|")
+        reqs = set(REQ.findall(line))
+        if line.startswith("|") and len(cells) > 1 and reqs:
+            out.setdefault(cells[0].strip(), set()).update(reqs)
+    return out
+
+
+def slices_left(base, ch, plan):
+    """One code PR per slice (S06): planned slices with no metrics.csv row in the base commit."""
+    done = built_slices(from_base(base, ch + "/metrics.csv"))
+    if done is None:
+        return []
+    with open(os.path.join(plan, "inputs", "granularity.json"), encoding="utf-8") as fh:
+        return [s.get("id") for s in json.load(fh).get("slices", []) if str(s.get("id")) not in done]
 
 
 def approved_plan(base, ch):

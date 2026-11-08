@@ -28,7 +28,8 @@ KNOWN = ["injection", "policy_guard", "spec_lint", "granularity", "trace_check",
 CHANGE = re.compile(r"openspec/changes/[A-Za-z0-9][A-Za-z0-9._-]*")
 sys.path.insert(0, HERE)
 import policy  # noqa: E402
-from changectx import PLAN_FILES, approved_plan, exists_in_base, changed_paths, default_base, from_base, git, texts_under  # noqa: E402
+from changectx import (PLAN_FILES, approved_plan, changed_paths, default_base, exists_in_base, from_base, git,  # noqa: E402
+                       slices_left, texts_under)
 from kitconst import DOCS, PROTECTED, TYPES, is_test_file, matches  # noqa: E402
 
 
@@ -74,17 +75,6 @@ def run_gate(gate, payload):
     return out
 
 
-def slices_left(base, ch, plan):
-    """One code PR per slice (S06): planned slices with no metrics.csv row in the base commit."""
-    rows = from_base(base, ch + "/metrics.csv")
-    if not rows:
-        return []
-    with open(rows, encoding="utf-8") as fh:
-        done = {line.split(",")[0].strip() for line in fh.readlines()[1:]}
-    with open(os.path.join(plan, "inputs", "granularity.json"), encoding="utf-8") as fh:
-        return [s.get("id") for s in json.load(fh).get("slices", []) if str(s.get("id")) not in done]
-
-
 def spec_type(d):
     try:
         with open(os.path.join(d, "spec.md"), encoding="utf-8") as fh:
@@ -103,7 +93,7 @@ def finish(report, ch):
     return 0 if report["pass"] else 1
 
 
-def main():
+def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("stage", choices=["ready", "done", "auto"])
     ap.add_argument("--repo", default=".")
@@ -115,31 +105,29 @@ def main():
     a = ap.parse_args()
     if a.change != "auto" and (not CHANGE.fullmatch(a.change.rstrip("/")) or ".." in a.change):
         ap.error("--change must be openspec/changes/<name> or auto")
-    reports = [os.path.abspath(r) for r in a.coverage_report]
-    baseline_report = os.path.abspath(a.baseline_report) if a.baseline_report else None
-    os.chdir(a.repo)
-    in_git = git("rev-parse", "--is-inside-work-tree") == "true"
-    base = (a.base or default_base()) if in_git else None
-    if in_git and not base:
-        ap.error("no remote default branch to compare with: pass --base <ref> (CI passes the merge-base)")
-    ch = a.change.rstrip("/")
-    if ch == "auto":
-        if not in_git:
-            ap.error("--change auto needs git")
-        found = sorted({m.group(0) for p in changed_paths(base) for m in [CHANGE.match(p)] if m and p != m.group(0)})
-        if len(found) != 1:
-            other = [p for p in changed_paths(base)  # protected files (a kit upgrade) are human-owned, tests included
-                     if not matches(p, PROTECTED) and (is_test_file(p) or not matches(p, DOCS))]
-            ok = not found and not other
-            why = ("no change folder: only docs or human-owned files changed" if ok else
-                   "one PR holds exactly one change folder; found %s" % (found or "none") +
-                   ("" if found else ", but code or tests changed: %s" % other[:5]))
-            return finish({"stage": a.stage, "change": None, "pass": ok, "error": why, "gates": []}, None)
-        ch = found[0]
+    return ap, a
+
+
+def find_change(base):
+    """--change auto: the one change folder the PR touches, or (None, why, ok) for a PR with none or several."""
+    found = sorted({m.group(0) for p in changed_paths(base) for m in [CHANGE.match(p)] if m and p != m.group(0)})
+    if len(found) == 1:
+        return found[0], None, True
+    other = [p for p in changed_paths(base)  # protected files (a kit upgrade) are human-owned, tests included
+             if not matches(p, PROTECTED) and (is_test_file(p) or not matches(p, DOCS))]
+    ok = not found and not other
+    why = ("no change folder: only docs or human-owned files changed" if ok else
+           "one PR holds exactly one change folder; found %s" % (found or "none") +
+           ("" if found else ", but code or tests changed: %s" % other[:5]))
+    return None, why, ok
+
+
+def context(a, ch, base, in_git, reports, baseline_report):
+    """Stage, approved plan, type and every gate input; returns (ctx, plan, rule)."""
     policy_path = os.path.join("docs", "ai", "policy.yml")
     if not os.path.isfile(policy_path):
         policy_path = FLOOR
-    floor, pol = policy.load(FLOOR), policy.load(policy_path)
+    pol = policy.load(policy_path)
     merged = approved_plan(base, ch) if in_git else None
     if a.stage == "auto":
         a.stage = "done" if merged or not in_git else "ready"
@@ -152,26 +140,51 @@ def main():
     ctx = {"change": ch, "stage": a.stage, "plan": plan or ch, "policy": pol, "policy_path": policy_path,
            "base": base, "type": wtype, "baselines": [b for b in [from_base(base, "docs/ai/policy.yml")] if b],
            "signoff": signoff, "no_production": bool(rule.get("no_production")), "coverage": cov, "test_cmd": a.test_cmd}
+    return ctx, plan, rule
+
+
+def plan_issue(ch, base, plan):
+    """At done in git: the plan must be merged, not used up by earlier slices, and evidence.md recorded here."""
+    if plan is None:
+        return "plan_not_approved", "the plan is not in the base commit: merge the plan PR first"
+    if exists_in_base(base, ch + "/evidence.md") and not slices_left(base, ch, plan):
+        return "plan_used", "this plan was already implemented; plan the next change in a new change folder"
+    if not os.path.isfile(os.path.join(ch, "evidence.md")) or not os.path.getsize(os.path.join(ch, "evidence.md")):
+        return "no_evidence", "record RED then GREEN in evidence.md (/implement)"
+    return None
+
+
+def main():
+    ap, a = parse_args()
+    reports = [os.path.abspath(r) for r in a.coverage_report]
+    baseline_report = os.path.abspath(a.baseline_report) if a.baseline_report else None
+    os.chdir(a.repo)
+    in_git = git("rev-parse", "--is-inside-work-tree") == "true"
+    base = (a.base or default_base()) if in_git else None
+    if in_git and not base:
+        ap.error("no remote default branch to compare with: pass --base <ref> (CI passes the merge-base)")
+    ch = a.change.rstrip("/")
+    if ch == "auto":
+        if not in_git:
+            ap.error("--change auto needs git")
+        ch, why, ok = find_change(base)
+        if ch is None:
+            return finish({"stage": a.stage, "change": None, "pass": ok, "error": why, "gates": []}, None)
+    floor = policy.load(FLOOR)
+    ctx, plan, rule = context(a, ch, base, in_git, reports, baseline_report)
     key, gates = a.stage + "_gates", []
     extra = rule.get("add", []) if a.stage == "done" else []
-    for g in floor.get(key, []) + pol.get(key, []) + extra:
+    for g in floor.get(key, []) + ctx["policy"].get(key, []) + extra:
         if g in KNOWN and g not in gates:
             gates.append(g)
     results = [run_gate(g, payload_for(g, ctx)) for g in gates]
-    plan_issue = None
-    if a.stage == "done" and in_git:
-        if plan is None:
-            plan_issue = ("plan_not_approved", "the plan is not in the base commit: merge the plan PR first")
-        elif exists_in_base(base, ch + "/evidence.md") and not slices_left(base, ch, plan):
-            plan_issue = ("plan_used", "this plan was already implemented; plan the next change in a new change folder")
-        elif not os.path.isfile(os.path.join(ch, "evidence.md")) or not os.path.getsize(os.path.join(ch, "evidence.md")):
-            plan_issue = ("no_evidence", "record RED then GREEN in evidence.md (/implement)")
-    if plan_issue:
+    issue = plan_issue(ch, base, plan) if a.stage == "done" and in_git else None
+    if issue:
         results.insert(0, {"gate": "plan", "pass": False, "findings": [
-            {"rule": plan_issue[0], "severity": "fail", "where": ch, "message": plan_issue[1]}]})
+            {"rule": issue[0], "severity": "fail", "where": ch, "message": issue[1]}]})
     ran = {r["gate"] for r in results}
     missing = [g for g in floor.get(key, []) if g not in ran]
-    report = {"stage": a.stage, "change": ch, "type": wtype, "pass": all(r["pass"] for r in results) and not missing,
+    report = {"stage": a.stage, "change": ch, "type": ctx["type"], "pass": all(r["pass"] for r in results) and not missing,
               "missing_floor_gates": missing, "gates": results}
     return finish(report, ch)
 
