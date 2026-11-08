@@ -138,7 +138,7 @@
 - id: script.slicer
   type: script
   path: kit/scripts/slicer.py
-  needs: [script.kitconst]
+  needs: [script.kitconst, script.policy, gate.granularity]
 - id: script.slice_pr
   type: script
   path: kit/scripts/slice_pr.py
@@ -150,7 +150,11 @@
 - id: script.upgrade
   type: script
   path: kit/scripts/upgrade.py
-  needs: [script.gate_check]
+  needs: [script.gate_check, script.changectx]
+- id: script.refine
+  type: script
+  path: kit/scripts/refine.py
+  needs: [gate.spec_lint, script.kitconst]
 - id: script.metrics_pull
   type: script
   path: kit/scripts/metrics_pull.py
