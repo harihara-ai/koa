@@ -1,4 +1,4 @@
 purpose: where KOA-5 stands; any session resumes here.
 
-stage: code PR S1 (green locally)
-next: CI done gate on S1; a human merges; then code PR S2
+stage: code PR S2 (green locally); S1 code PR koa#22
+next: CI done gate on S2; a human merges; then archive the change and /refresh
