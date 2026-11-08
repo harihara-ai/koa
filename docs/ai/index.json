@@ -34,14 +34,15 @@
   "id": "lib-request",
   "path": "lib/request.js",
   "kind": "module",
-  "purpose": "request getters; length reads only a digits-only Content-Length (KOA-5)",
+  "purpose": "request getters; length reads only a digits-only Content-Length (KOA-5); subdomains ignores a trailing root dot (KOA-6); ips drops the port of forwarded addresses (KOA-7)",
   "module": "request",
   "module_paths": [
    "lib/request.js",
-   "lib/search-params.js"
+   "lib/search-params.js",
+   "lib/host.js"
   ],
   "confidence": "low",
-  "verified_sha": "eb5416e1b81fd0048c2df4925df6cc6a61e15a62",
+  "verified_sha": "93676f45bae10388bc30c69d8e5dacc280c4bda0",
   "depends_on": [
    "lib-helpers"
   ],
@@ -51,14 +52,15 @@
   "id": "lib-response",
   "path": "lib/response.js",
   "kind": "module",
-  "purpose": "response setters and body handling; json(value) (KOA-1); length undefined for web stream bodies (KOA-2) and for a malformed Content-Length (KOA-5); problem(status, detail) RFC 9457 reply (KOA-4)",
+  "purpose": "response setters and body handling; json(value) (KOA-1); length undefined for web stream bodies (KOA-2) and for a malformed Content-Length (KOA-5); problem(status, detail) RFC 9457 reply (KOA-4); back() compares hosts via canonicalHost (KOA-6); set()/append() reject arrays for singleton headers (KOA-8)",
   "module": "response",
   "module_paths": [
    "lib/response.js",
-   "lib/is-stream.js"
+   "lib/is-stream.js",
+   "lib/host.js"
   ],
   "confidence": "low",
-  "verified_sha": "eb5416e1b81fd0048c2df4925df6cc6a61e15a62",
+  "verified_sha": "93676f45bae10388bc30c69d8e5dacc280c4bda0",
   "depends_on": [
    "lib-helpers"
   ],
@@ -68,16 +70,17 @@
   "id": "lib-helpers",
   "path": "lib/only.js",
   "kind": "module",
-  "purpose": "small helpers; only() is one Object.fromEntries expression (KOA-3); parseContentLength (KOA-5)",
+  "purpose": "small helpers; only() is one Object.fromEntries expression (KOA-3); parseContentLength (KOA-5); host.js: stripRootDot, canonicalHost (KOA-6)",
   "module": "helpers",
   "module_paths": [
    "lib/only.js",
    "lib/is-stream.js",
    "lib/search-params.js",
-   "lib/content-length.js"
+   "lib/content-length.js",
+   "lib/host.js"
   ],
   "confidence": "low",
-  "verified_sha": "eb5416e1b81fd0048c2df4925df6cc6a61e15a62",
+  "verified_sha": "93676f45bae10388bc30c69d8e5dacc280c4bda0",
   "depends_on": [],
   "est_tokens": null
  },
@@ -93,7 +96,7 @@
    "__tests__/*"
   ],
   "confidence": "medium",
-  "verified_sha": "eb5416e1b81fd0048c2df4925df6cc6a61e15a62",
+  "verified_sha": "93676f45bae10388bc30c69d8e5dacc280c4bda0",
   "depends_on": [],
   "est_tokens": 400
  },
@@ -108,7 +111,7 @@
    "__tests__/*"
   ],
   "confidence": "medium",
-  "verified_sha": "eb5416e1b81fd0048c2df4925df6cc6a61e15a62",
+  "verified_sha": "93676f45bae10388bc30c69d8e5dacc280c4bda0",
   "depends_on": [],
   "est_tokens": 350
  },
