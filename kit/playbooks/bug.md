@@ -3,8 +3,8 @@
 purpose: steps for a bug or production hotfix: a plan PR, then a code PR whose regression test fails first.
 
 1. **Intake.** `read_ticket`. Save `ticket.md`. Branch `fix/<KEY>-<slug>-plan`.
-2. **Plan PR.** Spec with a REQ ID for the broken behaviour (`Type: bug` or `hotfix`), a one-slice
-   `inputs/granularity.json` and `inputs/diff_scope.json`. Before it, run the tests of the touched modules with a
+2. **Plan PR.** Spec with a REQ ID for the broken behaviour (`Type: bug` or `hotfix`),
+   `inputs/granularity.json` (one slice for a hotfix) and `inputs/diff_scope.json`. Before it, run the tests of the touched modules with a
    throwaway fix: a test that asserts the bug goes into `diff_scope.json` and the spec, so a human approves its
    edit. `gate_check.py auto` runs ready; a human merges it.
 3. **Reproduce.** On `fix/<KEY>-<slug>` from the target: one failing test carrying the REQ ID. Record RED in `evidence.md`.
