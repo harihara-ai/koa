@@ -74,6 +74,17 @@ def run_gate(gate, payload):
     return out
 
 
+def slices_left(base, ch, plan):
+    """One code PR per slice (S06): planned slices with no metrics.csv row in the base commit."""
+    rows = from_base(base, ch + "/metrics.csv")
+    if not rows:
+        return []
+    with open(rows, encoding="utf-8") as fh:
+        done = {line.split(",")[0].strip() for line in fh.readlines()[1:]}
+    with open(os.path.join(plan, "inputs", "granularity.json"), encoding="utf-8") as fh:
+        return [s.get("id") for s in json.load(fh).get("slices", []) if str(s.get("id")) not in done]
+
+
 def spec_type(d):
     try:
         with open(os.path.join(d, "spec.md"), encoding="utf-8") as fh:
@@ -151,7 +162,7 @@ def main():
     if a.stage == "done" and in_git:
         if plan is None:
             plan_issue = ("plan_not_approved", "the plan is not in the base commit: merge the plan PR first")
-        elif exists_in_base(base, ch + "/evidence.md"):
+        elif exists_in_base(base, ch + "/evidence.md") and not slices_left(base, ch, plan):
             plan_issue = ("plan_used", "this plan was already implemented; plan the next change in a new change folder")
         elif not os.path.isfile(os.path.join(ch, "evidence.md")) or not os.path.getsize(os.path.join(ch, "evidence.md")):
             plan_issue = ("no_evidence", "record RED then GREEN in evidence.md (/implement)")
