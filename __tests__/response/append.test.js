@@ -40,3 +40,21 @@ describe('ctx.append(name, val)', () => {
     assert.deepStrictEqual(ctx.response.header.link, ['<http://localhost/>', '<http://localhost:80/>'])
   })
 })
+
+describe('REQ-RES-003: append to a singleton header', () => {
+  it('REQ-RES-003 happy: the first append sets the value', () => {
+    const ctx = context()
+    ctx.append('Location', '/a')
+    assert.strictEqual(ctx.response.get('Location'), '/a')
+  })
+
+  it('REQ-RES-003 error: a second append throws and keeps the value', () => {
+    const ctx = context()
+    ctx.append('Location', '/a')
+    assert.throws(() => ctx.append('Location', '/b'), {
+      name: 'AssertionError',
+      message: 'Assign multiple Location for response header is not allowed'
+    })
+    assert.strictEqual(ctx.response.get('Location'), '/a')
+  })
+})
