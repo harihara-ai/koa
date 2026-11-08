@@ -16,3 +16,12 @@ GREEN: the string form of `set` asserts for any array on a `SINGLETON_HEADERS` n
 Content-Type-only check -> pass 10, fail 0; full suite pass 485, fail 0; `npx standard` clean; lines 99.9%,
 branches 99.14%. Pin `__tests__/application/response.test.js:105` (Content-Type array throws) still green.
 Root cause: #1899 checked only `content-type` in `set`.
+
+## S3 REQ-RES-002 (response.set, object form)
+RED: `node --test __tests__/response/set.test.js` -> pass 11, fail 1 (`{ ETag: ['"a"', '"b"'] }`: expected an
+AssertionError, got the array set). `guard`: an object with a string sets it already on master.
+GREEN: the object form calls `this.set(header, value)` per key, so it takes the string form's check -> pass 12,
+fail 0; full suite pass 487, fail 0; `npx standard` clean; lines 99.9%, branches 99.14%.
+Root cause: the object form called `res.setHeader` directly, past the check.
+S05 check (untested branch found after the plan): none; `SINGLETON_HEADERS` paths in `append` and `set` (listed and
+not listed, array and not) each have a test from the spec's edge list.
