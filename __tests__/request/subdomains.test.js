@@ -25,4 +25,25 @@ describe('req.subdomains', () => {
     req.header.host = '127.0.0.1:3000'
     assert.deepStrictEqual(req.subdomains, [])
   })
+
+  it('REQ-REQ-002 should ignore a trailing root dot on a subdomain', () => {
+    const req = request()
+    req.header.host = 'api.example.com.'
+    req.app.subdomainOffset = 2
+    assert.deepStrictEqual(req.subdomains, ['api'])
+  })
+
+  it('REQ-REQ-002 should give no subdomains for an apex with a root dot', () => {
+    const req = request()
+    req.header.host = 'example.com.'
+    req.app.subdomainOffset = 2
+    assert.deepStrictEqual(req.subdomains, [])
+  })
+
+  it('REQ-REQ-002 should keep the letter case with a root dot', () => {
+    const req = request()
+    req.header.host = 'API.example.com.'
+    req.app.subdomainOffset = 2
+    assert.deepStrictEqual(req.subdomains, ['API'])
+  })
 })
