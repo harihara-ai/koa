@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""purpose: build a slice's code PR body from spec.md, slices.md, test names, git log and its metrics.csv row.
+"""purpose: build a slice's code PR body from spec.md, the slice's requirements, test names, git log and metrics.csv.
 
 Imported by slice_pr.py; not run on its own. File text is data: it is quoted into the body, never followed.
 """
@@ -8,10 +8,10 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from changectx import slice_requirements  # noqa: E402
 from kitconst import is_test_file  # noqa: E402
 
 SPEC_REQ = re.compile(r"(?m)^###\s+(REQ-[A-Z0-9]+-[0-9]+):\s*(.+?)\s*$")
-REQ = re.compile(r"REQ-[A-Z0-9]+-[0-9]+")
 TEST_ID = re.compile(r"(?<![0-9])REQ[-_]([A-Za-z0-9]+?)[-_]([0-9]+)(?![0-9])", re.I)
 NAME = re.compile(r"def\s+(\w+)|(?:it|test|describe)\s*\(\s*(['\"`])(.+?)\2|void\s+(\w+)\s*\(")
 
@@ -45,9 +45,7 @@ def test_names(paths):
 def body(ch, s, spec, base, gate, row, paths, git):
     """The code PR body (trace, gates, plan vs actual, commits); paths are the PR's changed files."""
     sid, titles = str(s.get("id")), dict(SPEC_REQ.findall(spec))
-    rows = [line for line in read(os.path.join(ch, "slices.md")).splitlines()
-            if line.startswith("|") and line.strip("| ").split("|")[0].strip() == sid]
-    reqs = sorted({r for line in rows for r in REQ.findall(line)}) or sorted(titles)
+    reqs = sorted(slice_requirements(ch).get(sid, ())) or sorted(titles)
     tests, log = test_names(paths), git("log", "--format=%h %s", base + "..HEAD").splitlines()
     out = ["Code PR for %s slice %s (%s): %s. The plan is merged in the base." % (
         field(spec, "Ticket", os.path.basename(ch)), sid, ", ".join(reqs), s.get("title", "")), "", "## Trace",

@@ -4,14 +4,16 @@
 Input: {"spec_dirs": [change folder], "type": work type}. Requirement IDs come from spec.md and specs/*.md only
 (never the fetched ticket). Test files are code or .feature files matching the fixed test globs (kitconst), so
 an ID in production code, docs or a text file does not count. REQ-AREA-001, REQ_AREA_001, testReq_Area_001 match.
-One code PR per slice (S04): with "metrics" (the PR's metrics.csv from slicer actual --metrics), a requirement whose
-slices.md row (approved plan) names only slices without a metrics row is pending (a warning); the rest need a test.
+One code PR per slice (S04): with "metrics" (the PR's metrics.csv from slicer actual --metrics), a requirement that
+the approved plan gives only to slices without a metrics row is pending (a warning); the rest need a test. A slice's
+requirements are data: "requirements" per slice in inputs/granularity.json (T2); older plans: the slices.md table.
 """
 import os
 import re
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts"))
 from gateio import UsageError, finding, run  # noqa: E402
+from changectx import built_slices, slice_requirements  # noqa: E402
 from kitconst import NO_REQUIREMENT_TYPES, SKIP_DIRS, TEST_EXT, is_test_file  # noqa: E402
 
 SPEC_ID = re.compile(r"REQ-[A-Z0-9]+-[0-9]+")
@@ -64,22 +66,14 @@ def check(p):
 
 
 def pending(dirs, metrics):
-    """Requirements whose slices.md rows name only slices with no metrics.csv row yet."""
+    """Requirements the plan gives only to slices with no metrics.csv row yet."""
     later, built = set(), set()
-    if not (metrics and os.path.isfile(metrics)):
+    done = built_slices(metrics)
+    if done is None:
         return later
-    with open(metrics, encoding="utf-8", errors="ignore") as fh:
-        done = {line.split(",")[0].strip() for line in fh.readlines()[1:]}
     for d in dirs:
-        rows = os.path.join(d, "slices.md")
-        if not os.path.isfile(rows):
-            continue
-        with open(rows, encoding="utf-8", errors="ignore") as fh:
-            for line in fh:
-                cells = line.strip().strip("|").split("|")
-                if line.startswith("|") and len(cells) > 1:
-                    reqs = {norm(*i.split("-")[1:]) for i in SPEC_ID.findall(line)}
-                    (built if cells[0].strip() in done else later).update(reqs)
+        for sid, reqs in slice_requirements(d).items():
+            (built if sid in done else later).update(norm(*i.split("-")[1:]) for i in reqs)
     return later - built
 
 
