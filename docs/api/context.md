@@ -188,6 +188,7 @@ Koa uses [http-assert](https://github.com/jshttp/http-assert) for assertions.
   - `ctx.body`
   - `ctx.body=`
   - `ctx.has()`
+  - `ctx.problem()`
   - `ctx.status`
   - `ctx.status=`
   - `ctx.message`

@@ -188,6 +188,18 @@ app.use(async ctx => {
 
   The Content-Type is defaulted to application/json. This includes plain objects `{ foo: 'bar' }` and arrays `['foo', 'bar']`.
 
+### response.problem(status, [detail])
+
+  Send an [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem reply: set `status` (400 to 599, else a
+  `TypeError`), `Content-Type: application/problem+json` and a JSON body with `type`, `title` (the status message),
+  `status` and, when given, `detail`. A client whose `Accept` allows `text/plain` but no JSON type gets
+  `"<title>: <detail>"` as text.
+
+```js
+ctx.response.problem(404, 'No user 7');
+// => 404 {"type":"about:blank","title":"Not Found","status":404,"detail":"No user 7"}
+```
+
 ### response.get(field)
 
   Get a response header field value with case-insensitive `field`.
