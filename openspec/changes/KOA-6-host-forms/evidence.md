@@ -22,3 +22,12 @@ Host the URL parser refuses (`exa mple.com`, `example.com:99999`) already throws
 `new URL(referrer, ctx.href)`, on master too, before the helper runs. Removed; full suite pass 468; host.js lines 100%.
 The spec assumption "a Host the URL parser refuses never matches" is wrong: it throws, as before this change
 (out of scope; noted, not changed). The non-default port branch is covered by S3's tests.
+
+## S3 REQ-RES-006 (response.back, default port)
+RED: `node --test __tests__/response/back.test.js` -> pass 13, fail 1 (Host `example.com:80` with Referer
+`https://example.com/return`: expected `/fallback`, got the Referer: S2 dropped port 80 for every scheme). `guard`:
+`example.com:80` with an `http:` Referer (S2 already passes it) and `example.com:8080` (never matched).
+GREEN: `canonicalHost(host, scheme)` takes the Referer's scheme, so the default port is that scheme's -> pass 14,
+fail 0; full suite pass 471, fail 0; `npx standard` clean; host.js and response.js 100% lines and branches; all
+branches 99.13%. Probe (scratchpad): Host `example.com:443` with an `https:` Referer now matches; with `http:` it does not.
+Root cause: `back` compared the Referer's parsed host (default port dropped) with the raw Host (port kept).

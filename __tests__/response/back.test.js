@@ -80,4 +80,22 @@ describe('ctx.back([alt])', () => {
     ctx.back('/fallback')
     assert.equal(ctx.response.header.location, '/fallback')
   })
+
+  it('REQ-RES-006 should redirect to a same host Referer when Host has the default http port', () => {
+    const ctx = context({ url: '/', headers: { host: 'example.com:80', referer: 'http://example.com/return' } })
+    ctx.back('/fallback')
+    assert.equal(ctx.response.header.location, 'http://example.com/return')
+  })
+
+  it('REQ-RES-006 should use alt when Host has another port', () => {
+    const ctx = context({ url: '/', headers: { host: 'example.com:8080', referer: 'http://example.com/return' } })
+    ctx.back('/fallback')
+    assert.equal(ctx.response.header.location, '/fallback')
+  })
+
+  it('REQ-RES-006 should use alt when Host has the default port of the other scheme', () => {
+    const ctx = context({ url: '/', headers: { host: 'example.com:80', referer: 'https://example.com/return' } })
+    ctx.back('/fallback')
+    assert.equal(ctx.response.header.location, '/fallback')
+  })
 })
