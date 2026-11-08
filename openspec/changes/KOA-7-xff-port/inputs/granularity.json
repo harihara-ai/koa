@@ -1,0 +1,58 @@
+{
+ "slices": [
+  {
+   "id": "S1",
+   "title": "the forwarded ip list drops the port of an IPv4 entry",
+   "requirements": [
+    "REQ-REQ-003",
+    "REQ-REQ-005"
+   ],
+   "scenarios": 4,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 3,
+   "lines": 35,
+   "files": 5,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "stripPort",
+     "ips",
+     "ip"
+    ],
+    "values": [
+     "'23.243.1.1:38242'",
+     "'host.example:80'"
+    ]
+   }
+  },
+  {
+   "id": "S2",
+   "title": "the forwarded ip list drops the IPv6 brackets with the port",
+   "requirements": [
+    "REQ-REQ-004"
+   ],
+   "scenarios": 3,
+   "modules": 1,
+   "contracts": 0,
+   "symbols": 2,
+   "lines": 25,
+   "files": 4,
+   "untested": "none",
+   "testable": "yes",
+   "estimate": true,
+   "seeds": {
+    "symbols": [
+     "stripPort",
+     "ips"
+    ],
+    "values": [
+     "'[2001:db8::1]:8080'",
+     "'::ffff:1.2.3.4'"
+    ]
+   }
+  }
+ ]
+}
