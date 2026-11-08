@@ -86,3 +86,20 @@ describe('REQ-RES-001: set an array on a singleton header', () => {
     assert.deepStrictEqual(ctx.response.get('Link'), ['<a>', '<b>'])
   })
 })
+
+describe('REQ-RES-002: set an object with an array on a singleton header', () => {
+  it('REQ-RES-002 happy: a single string value is set', () => {
+    const ctx = context()
+    ctx.set({ 'Content-Type': 'text/plain' })
+    assert.strictEqual(ctx.response.get('Content-Type'), 'text/plain')
+  })
+
+  it('REQ-RES-002 error: an array of two values throws', () => {
+    const ctx = context()
+    assert.throws(() => ctx.set({ ETag: ['"a"', '"b"'] }), {
+      name: 'AssertionError',
+      message: 'Assign multiple ETag for response header is not allowed'
+    })
+    assert.strictEqual(ctx.response.get('ETag'), undefined)
+  })
+})
