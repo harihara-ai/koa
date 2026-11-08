@@ -1,0 +1,27 @@
+{
+ "slices": {
+  "S1": {
+   "code": [
+    "lib/context.js",
+    "lib/request.js"
+   ],
+   "tests": [
+    "__tests__/request/ip.test.js",
+    "__tests__/request/ips.test.js",
+    "__tests__/request/subdomains.test.js"
+   ],
+   "pins": []
+  },
+  "S2": {
+   "code": [
+    "lib/context.js",
+    "lib/request.js"
+   ],
+   "tests": [
+    "__tests__/request/ip.test.js",
+    "__tests__/request/ips.test.js"
+   ],
+   "pins": []
+  }
+ }
+}
