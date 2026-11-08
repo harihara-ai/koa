@@ -1,4 +1,4 @@
 purpose: where KOA-6 stands; any session resumes here.
 
-stage: code PR S1
-next: CI done gate on S1; a human merges
+stage: code PR S2
+next: CI done gate on S2; a human merges
