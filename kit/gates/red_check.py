@@ -78,7 +78,7 @@ def check(p):
                 os.remove(f) if os.path.exists(f) else None
             elif os.path.exists(saved):
                 os.makedirs(os.path.dirname(f) or ".", exist_ok=True)
-                shutil.copy2(saved, f)
+                shutil.copy(saved, f)  # a new mtime: builds see it as newer than the base run's output (T5-04)
         shutil.rmtree(keep, ignore_errors=True)
     if on_base in ERRORS:
         return [finding("runner_error", "the test command could not run (exit %d)" % on_base)], {"tests": tests}

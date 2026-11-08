@@ -7,7 +7,7 @@ import re
 
 TEST_GLOBS = ["tests/*", "test/*", "spec/*", "features/*", "*/tests/*", "*/test/*", "src/test/*",
               "*.tests/*", "*unittests*/*", "*integrationtests*/*", "*_test.*", "*.test.*", "*_spec.*",
-              "test_*", "*/test_*", "*.feature", "*conftest.*", "safety-net/*"]
+              "test_*", "*/test_*", "*.feature", "*conftest.*", "safety-net/*", "__tests__/*", "*/__tests__/*"]  # jest: T5-02
 TEST_NAME = re.compile(r"(^|[a-z0-9_])(Tests?|Spec|IT)\.[A-Za-z0-9]+$")  # FeeTest.php, not Contest.php
 NOT_PRODUCTION = ["openspec/*", "docs/*", "*.md"]
 DOCS = ["docs/*", "*.md"]

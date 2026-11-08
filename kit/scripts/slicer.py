@@ -4,10 +4,11 @@
 Usage: slicer.py scan   --change openspec/changes/<name> [--repo DIR]
        slicer.py actual --change openspec/changes/<name> --base REF [--slice ID] [--metrics] [--repo DIR]
 scan: each slice in inputs/granularity.json names "seeds": {"symbols": [...], "values": [...]} (from codenav and the
-spec). git grep finds code and tests that use a symbol, and tests that hold a value (tests that pin current
-behaviour, P04). Writes inputs/impact.json, raises "files" and "symbols" (never lowers them) and adds the files to
-inputs/diff_scope.json impact_scan. actual: changed lines and files outside the change folder vs the estimate; a
-miss is more than 50% over; scan_misses are changed files neither the scan nor the plan (diff_scope.json) lists.
+spec). git grep finds code (CODE_EXT only, not release notes or site xml: T5-01) and tests that use a symbol, and
+tests that hold a value (tests that pin current behaviour, P04). Writes inputs/impact.json, raises "files" and
+"symbols" (never lowers them) and adds the files to inputs/diff_scope.json impact_scan. actual: changed lines and
+files outside the change folder vs the estimate; a miss is more than 50% over; scan_misses are changed files
+neither the scan nor the plan (diff_scope.json) lists.
 --metrics appends a metrics.csv row.
 Report only: exit 0, or 2 on bad input. Seeds are data: matched literally, never as options or patterns.
 """
@@ -19,7 +20,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from kitconst import DOCS, is_test_file, matches  # noqa: E402
+from kitconst import CODE_EXT, DOCS, is_test_file, matches  # noqa: E402
 
 SKIP = ["openspec/*", "kit/*", "docs/*", ".claude/*", ".github/*"]
 MISS_PCT = 50
@@ -73,7 +74,10 @@ def scan(ch):
         for sym in syms:
             for path, _ in grep(sym, True):
                 if kept(path):
-                    (tests if is_test_file(path) else code).add(path)
+                    if is_test_file(path):
+                        tests.add(path)
+                    elif path.lower().endswith(CODE_EXT):
+                        code.add(path)
         for val in (str(x) for x in seeds.get("values", [])):
             pins.update("%s:%s" % (p, n) for p, n in grep(val, False) if kept(p) and is_test_file(p))
         files = code | tests | {p.split(":")[0] for p in pins}
